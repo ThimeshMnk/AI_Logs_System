@@ -1,0 +1,11 @@
+# Rust
+/log-producer/target/
+**/*.rs.bk
+
+# Python
+/ml-detector/venv/
+/ml-detector/__pycache__/
+*.pyc
+
+# Infrastructure
+.env
