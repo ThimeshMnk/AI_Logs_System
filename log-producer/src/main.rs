@@ -35,18 +35,32 @@ async fn main() {
 
     println!("Log Producer started. Sending logs to Redpanda...");
 
-    loop {
-        let log = LogEntry {
-            timestamp: Utc::now().to_rfc3339(),
-            ip_address: generate_ip(),
-            method: "GET".to_string(),
-            path: "/api/v1/resource".to_string(),
-            status: 200,
-            response_time_ms: rand::thread_rng().gen_range(10..500),
+   loop {
+        let mut rng = rand::rng();
+        
+        let is_anomaly = rng.random_bool(0.05); 
+
+        let log = if is_anomaly {
+            LogEntry {
+                timestamp: Utc::now().to_rfc3339(),
+                ip_address: "99.99.99.99".to_string(),
+                method: "POST".to_string(),
+                path: "/admin/upload".to_string(),
+                status: 500,
+                response_time_ms: 5000, 
+            }
+        } else {
+            LogEntry {
+                timestamp: Utc::now().to_rfc3339(),
+                ip_address: generate_ip(),
+                method: "GET".to_string(),
+                path: "/api/v1/resource".to_string(),
+                status: 200,
+                response_time_ms: rng.random_range(10..150),
+            }
         };
 
         let payload = serde_json::to_string(&log).unwrap();
-
         let record = FutureRecord::to("network-logs")
             .payload(&payload)
             .key(&log.ip_address);
